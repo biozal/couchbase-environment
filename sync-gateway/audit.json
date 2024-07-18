@@ -1,0 +1,22 @@
+{ 
+	"bucket": "inventoryDemo", 
+	"num_index_replicas": 0,
+	"scopes": {
+		"audit": {
+			"collections": {
+				"projects":{
+					"sync": "function (doc, oldDoc, meta) { try { console.log(\"********Processing Project Docs\"); validateNotEmpty(\"teams\", doc.teams); var teams = getTeams(); teams.forEach(function (team) { requireRole(team); if (!isDelete()) {  var channelId = \"channel.\" + team; console.log(\"********Setting Project Channel to \" + channelId);  channel(channelId); access(\"role:\" + team, \"channel.\" + team); } }); } catch (e) { console.log(\"***************Error Processing Project Docs: \" + e); } function getTeams() {  return isDelete() ? oldDoc.teams : doc.teams; } function isDelete() { return doc._deleted == true; } function validateNotEmpty(key, value) { if (!value) { throw {forbidden: key + \" is not provided.\"}; } } }",
+					"import_filter": "function(doc) { if (doc.isActive === true && (doc.isArchived === null || doc.isArchived === false)){ return true; } return false; }"
+				},
+				"inventory":{
+					"sync": "function (doc, oldDoc, meta) { try { console.log(\"********Processing Inventory Docs\"); validateNotEmpty(\"teams\", doc.teams); var teams = getTeams(); teams.forEach(function (team) { requireRole(team); if (!isDelete()) { var channelId = \"channel.\" + team; console.log(\"********Setting Inventory Channel to \" + channelId); channel(channelId); access(\"role:\" + team, \"channel.\" + team); } }); } catch (e) { console.log(\"***************Error Processing Inventory Docs: \" + e); } function getTeams() { return isDelete() ? oldDoc.teams : doc.teams; } function isDelete() { return doc._deleted == true; } function validateNotEmpty(key, value) { if (!value) { throw {forbidden: key + \" is not provided.\"}; } } }",
+					"import_filter": "function(doc) { if (doc.isActive === true && (doc.isArchived === null || doc.isArchived === false)){ return true; } return false; }"
+				},
+				"userProfiles":{
+					"sync": "function (doc, oldDoc, meta) { console.log("********Processing User Profile Doc. Is oldDoc == null? " + (oldDoc == null)); validateNotEmpty("email", doc.email); var expectedDocId = "user" + "::" + doc.email; if (expectedDocId != doc._id) { throw({forbidden: "UserProfile doc Id must be of form user::email"}); } var username = getEmail(); var channelId = "channel."+ username; try { channel("*"); requireAdmin(); if (!isDelete()) { channel(channelId); access(username, channelId); } } catch (error) { console.log("UserProfile - This is not a doc import " + error); if (!isDelete()) { if (isCreate()) { channel(channelId); access(username, channelId); } else { validateReadOnly("email", doc.email, oldDoc.email); requireUser(oldDoc.email); } } } function getEmail() { return (isDelete() ? oldDoc.email : doc.email); } function isCreate() { return ((oldDoc == false) || (oldDoc == null || oldDoc._deleted) && !isDelete()); } function isDelete() { return (doc._deleted == true); } function validateNotEmpty(key, value) { if (!value) { throw({forbidden: key + " is not provided."}); } } function validateReadOnly(name, value, oldValue) { if (value != oldValue) { throw({forbidden: name + " is read-only."}); } } }",
+					"import_filter": "function(doc) { if (doc.isActive === true){ return true; } return false; }"
+				}
+			}
+ 		}			
+	}
+}

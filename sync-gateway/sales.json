@@ -1,0 +1,14 @@
+{
+  "bucket": "inventoryDemo",
+  "num_index_replicas": 0,
+  "scopes": {
+    "sales": {
+      "collections": {
+        "userProfiles":{
+          "sync": "function (doc, oldDoc, meta) { channel(\"*\"); if (oldDoc || doc._deleted) { throw({forbidden: \"Modifications are not allowed\"}); } }",
+          "import_filter": "function(doc) { if (doc.isActive === true){ return true; } return false; }"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{ 
+	"bucket": "inventoryDemo", 
+	"num_index_replicas": 0,
+	"scopes": {
+		"rbac": {
+			"collections": {
+				"userProfiles":{
+					"sync": "function (doc, oldDoc, meta) { console.log("********Processing User Profile Doc. Is oldDoc == null? " + (oldDoc == null)); validateNotEmpty("email", doc.email); var expectedDocId = "user" + "::" + doc.email; if (expectedDocId != doc._id) { throw({forbidden: "UserProfile doc Id must be of form user::email"}); } var username = getEmail(); var channelId = "channel."+ username; try { channel("*"); requireAdmin(); if (!isDelete()) { channel(channelId); access(username, channelId); } } catch (error) { console.log("UserProfile - This is not a doc import " + error); if (!isDelete()) { if (isCreate()) { channel(channelId); access(username, channelId); } else { validateReadOnly("email", doc.email, oldDoc.email); requireUser(oldDoc.email); } } } function getEmail() { return (isDelete() ? oldDoc.email : doc.email); } function isCreate() { return ((oldDoc == false) || (oldDoc == null || oldDoc._deleted) && !isDelete()); } function isDelete() { return (doc._deleted == true); } function validateNotEmpty(key, value) { if (!value) { throw({forbidden: key + " is not provided."}); } } function validateReadOnly(name, value, oldValue) { if (value != oldValue) { throw({forbidden: name + " is read-only."}); } } }",
+					"import_filter": "function(doc) { if (doc.isActive === true){ return true; } return false; }"
+				}
+			}
+		}
+	}
+}
