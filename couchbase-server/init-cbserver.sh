@@ -112,7 +112,7 @@ if ! [ -f "$FILE" ]; then
     --username $COUCHBASE_ADMINISTRATOR_USERNAME \
     --password $COUCHBASE_ADMINISTRATOR_PASSWORD \
     --bucket $COUCHBASE_BUCKET \
-    --create-collection sales.orderLilne
+    --create-collection sales.orderLine
 
   /opt/couchbase/bin/couchbase-cli collection-manage -c localhost:8091 \
     --username $COUCHBASE_ADMINISTRATOR_USERNAME \
